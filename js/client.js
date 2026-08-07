@@ -433,6 +433,7 @@ function renderClientBookingView(opts) {
             });
             saveData();
             toast('Cita reservada. \u00a1Te esperamos!', 'success');
+            if (typeof launchConfetti === 'function') launchConfetti();
 
             body.innerHTML = '<div class="fl-success">' +
                 '<div class="fl-success-icon">\u2713</div>' +

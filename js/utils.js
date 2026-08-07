@@ -500,3 +500,87 @@ function getClosedDayForDate(dateStr) {
     }
     return null;
 }
+
+/* Custom Select Dropdown */
+function csDropdown(id, options, selectedVal, opts) {
+    opts = opts || {};
+    var iconHtml = opts.icons || {};
+    var placeholder = opts.placeholder || 'Seleccionar';
+    var container = document.getElementById(id);
+    if (!container) return null;
+
+    var selectedText = placeholder;
+    var isPlaceholder = true;
+    options.forEach(function (o) {
+        if (o.value === selectedVal) { selectedText = o.label; isPlaceholder = false; }
+    });
+
+    var html = '<div class="cs-trigger">';
+    if (opts.triggerIcon) html += opts.triggerIcon;
+    html += '<span class="cs-trigger-text' + (isPlaceholder ? ' placeholder' : '') + '">' + selectedText + '</span>';
+    html += '<svg class="cs-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
+    html += '</div>';
+    html += '<div class="cs-options">';
+    options.forEach(function (o) {
+        var sel = o.value === selectedVal ? ' selected' : '';
+        html += '<div class="cs-option' + sel + '" data-cs-val="' + o.value + '">';
+        if (iconHtml[o.value]) html += '<div class="cs-option-icon">' + iconHtml[o.value] + '</div>';
+        html += '<span>' + o.label + '</span>';
+        html += '<svg class="cs-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+        html += '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+
+    var trigger = container.querySelector('.cs-trigger');
+    var optionsEl = container.querySelector('.cs-options');
+
+    trigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var wasOpen = container.classList.contains('open');
+        document.querySelectorAll('.cs-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+        if (!wasOpen) {
+            container.classList.add('open');
+            var rect = optionsEl.getBoundingClientRect();
+            if (rect.bottom > window.innerHeight - 10) {
+                optionsEl.style.top = 'auto';
+                optionsEl.style.bottom = 'calc(100% + 6px)';
+            }
+        }
+    });
+
+    container.querySelectorAll('.cs-option').forEach(function (opt) {
+        opt.addEventListener('click', function () {
+            var val = opt.dataset.csVal;
+            container.querySelectorAll('.cs-option').forEach(function (o) { o.classList.remove('selected'); });
+            opt.classList.add('selected');
+            var textEl = container.querySelector('.cs-trigger-text');
+            textEl.textContent = opt.querySelector('span').textContent;
+            textEl.classList.remove('placeholder');
+            container.classList.remove('open');
+            if (opts.onChange) opts.onChange(val);
+        });
+    });
+
+    return {
+        setValue: function (val) {
+            var textEl = container.querySelector('.cs-trigger-text');
+            var found = false;
+            options.forEach(function (o) {
+                if (o.value === val) { textEl.textContent = o.label; textEl.classList.remove('placeholder'); found = true; }
+            });
+            if (!found) { textEl.textContent = placeholder; textEl.classList.add('placeholder'); }
+            container.querySelectorAll('.cs-option').forEach(function (o) {
+                o.classList.toggle('selected', o.dataset.csVal === val);
+            });
+        },
+        getValue: function () {
+            var sel = container.querySelector('.cs-option.selected');
+            return sel ? sel.dataset.csVal : null;
+        }
+    };
+}
+
+document.addEventListener('click', function () {
+    document.querySelectorAll('.cs-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+});

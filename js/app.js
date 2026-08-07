@@ -9,10 +9,14 @@ function el(id) {
 
 function render(html) {
     mainContent.innerHTML = html;
+    mainContent.classList.remove('page-fade-in');
+    void mainContent.offsetWidth;
+    mainContent.classList.add('page-fade-in');
     window.scrollTo(0, 0);
     bindPublicEvents();
     bindHeaderActions();
     bindContactForm();
+    setTimeout(function () { mainContent.classList.remove('page-fade-in'); }, 350);
 }
 
 function toast(message, type) {
@@ -75,9 +79,15 @@ function renderHome() {
     services = services.slice(0, 6);
     var staff = data.staff || [];
 
+    var testimonials = [
+        { name: 'Carlos M.', initials: 'CM', text: 'El mejor barbero de Sevilla. La atenci&oacute;n es incre&iacute;ble y siempre salgo encantado. Toni lleva m&aacute;s de 15 a&ntilde;os destrozando pelos.', stars: 5, date: 'Hace 2 semanas' },
+        { name: 'Ana R.', initials: 'AR', text: 'Excelente trato y profesionalidad. El servicio de est&eacute;tica es de primer nivel. Reservar online es s&uacute;per f&aacute;cil.', stars: 5, date: 'Hace 1 mes' },
+        { name: 'Pedro L.', initials: 'PL', text: 'Llevo a&ntilde;os viniendo y nunca me decepciona. Pago con tarjeta en un momento. Gran experiencia siempre.', stars: 5, date: 'Hace 3 d&iacute;as' }
+    ];
+
     render(
-        '<section class="hero"><div class="container"><div class="hero-content">' +
-        '<div class="hero-eyebrow">Barber&iacute;a de &eacute;lite</div>' +
+        '<section class="hero"><div class="container"><canvas id="heroParticles"></canvas><div class="hero-content">' +
+        '<div class="hero-eyebrow" data-scramble>Barber&iacute;a de &eacute;lite</div>' +
         '<h1>El arte del<span>corte perfecto</span></h1>' +
         '<p class="hero-subtitle">Profesionales de primer nivel. Reserva tu cita con un solo clic y descubre una experiencia de barber&iacute;a sin igual.</p>' +
         '<div class="hero-buttons">' +
@@ -85,24 +95,26 @@ function renderHome() {
         '<button class="btn btn-outline btn-lg" data-nav="services">Ver servicios</button>' +
         '</div>' +
         '<div class="hero-stats">' +
-        '<div><div class="hero-stat-value">8+</div><div class="hero-stat-label">A&ntilde;os de experiencia</div></div>' +
-        '<div><div class="hero-stat-value">5000+</div><div class="hero-stat-label">Clientes satisfechos</div></div>' +
-        '<div><div class="hero-stat-value">4.9</div><div class="hero-stat-label">Valoraci&oacute;n media</div></div>' +
+        '<div data-reveal><div class="hero-stat-value" data-count="15" data-suffix="+">0</div><div class="hero-stat-label">A&ntilde;os de experiencia</div></div>' +
+        '<div data-reveal data-reveal-delay="100"><div class="hero-stat-value" data-count="5000" data-suffix="+">0</div><div class="hero-stat-label">Clientes satisfechos</div></div>' +
+        '<div data-reveal data-reveal-delay="200"><div class="hero-stat-value" data-count="5.0" data-prefix="">0</div><div class="hero-stat-label">Valoraci&oacute;n media</div></div>' +
         '</div></div></div></section>' +
 
         '<section class="section"><div class="container">' +
-        '<div class="section-header"><span class="eyebrow">Servicios</span><h2>Excelencia en cada detalle</h2>' +
+        '<div class="section-header" data-reveal><span class="eyebrow">Servicios</span><h2>Excelencia en cada detalle</h2>' +
         '<p>Servicios de barber&iacute;a y est&eacute;tica con los m&aacute;s altos est&aacute;ndares de calidad profesional.</p></div>' +
-        '<div class="services-grid">' + services.map(serviceCard).join('') + '</div>' +
-        '<div style="text-align:center; margin-top:40px;">' +
+        '<div class="services-grid">' + services.map(function (s, i) {
+            return '<div data-reveal data-reveal-delay="' + (i * 80) + '">' + serviceCard(s) + '</div>';
+        }).join('') + '</div>' +
+        '<div style="text-align:center; margin-top:40px;" data-reveal>' +
         '<button class="btn btn-outline btn-lg" data-nav="services">Ver todos los servicios</button>' +
         '</div></div></section>' +
 
         '<section class="section section-alt"><div class="container">' +
-        '<div class="section-header"><span class="eyebrow">Nuestro equipo</span><h2>Maestros de su oficio</h2>' +
+        '<div class="section-header" data-reveal><span class="eyebrow">Nuestro equipo</span><h2>Maestros de su oficio</h2>' +
         '<p>Profesionales con a&ntilde;os de experiencia comprometidos con la excelencia.</p></div>' +
         '<div class="services-grid team-grid">' +
-        staff.map(function (s) {
+        staff.map(function (s, i) {
             var accentColor = s.role === 'hair' ? 'var(--gold)' : '#be185d';
             var photoHtml;
             if (s.photo) {
@@ -110,15 +122,56 @@ function renderHome() {
             } else {
                 photoHtml = '<div class="staff-avatar" style="background:' + accentColor + ';width:120px;height:120px;font-size:2rem;margin:0 auto 20px;border:3px solid ' + accentColor + ';box-shadow:0 8px 32px rgba(212,168,67,0.25);">' + initials(s.name) + '</div>';
             }
-            return '<div class="service-card team-card" style="--accent:' + accentColor + ';"><div class="service-body" style="text-align:center;padding:40px 28px 32px;">' +
+            return '<div data-reveal data-reveal-delay="' + (i * 100) + '"><div class="service-card team-card" style="--accent:' + accentColor + ';"><div class="service-body" style="text-align:center;padding:40px 28px 32px;">' +
                 photoHtml +
                 '<h3 style="font-size:1.35rem;margin-top:4px;">' + s.name + '</h3>' +
                 '<p style="margin-top:6px;color:var(--gray-400);font-size:0.88rem;">' + ROLE_LABELS[s.role] + '</p>' +
                 '<div style="width:32px;height:2px;background:' + accentColor + ';margin:16px auto 0;border-radius:1px;opacity:0.5;"></div>' +
+                '</div></div></div>';
+        }).join('') +
+        '</div></div></section>' +
+
+        '<section class="section"><div class="container">' +
+        '<div class="section-header" data-reveal><span class="eyebrow">Opiniones</span><h2>Lo que dicen nuestros clientes</h2>' +
+        '<p>M&aacute;s de 5000 clientes satisfechos conf&iacute;an en nosotros.</p></div>' +
+        '<div class="testimonials-grid">' +
+        testimonials.map(function (t, i) {
+            var starsHtml = '';
+            for (var s = 0; s < t.stars; s++) {
+                starsHtml += '<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+            }
+            return '<div class="testimonial-card" data-reveal data-reveal-delay="' + (i * 120) + '">' +
+                '<div class="testimonial-quote">&ldquo;</div>' +
+                '<div class="testimonial-stars">' + starsHtml + '</div>' +
+                '<p class="testimonial-text">' + t.text + '</p>' +
+                '<div class="testimonial-author">' +
+                '<div class="testimonial-avatar">' + t.initials + '</div>' +
+                '<div><div class="testimonial-name">' + t.name + '</div>' +
+                '<div class="testimonial-date">' + t.date + '</div></div>' +
                 '</div></div>';
         }).join('') +
+        '</div></div></section>' +
+
+        '<section class="section section-alt"><div class="container">' +
+        '<div class="section-header" data-reveal><span class="eyebrow">Preguntas frecuentes</span><h2>¿Tienes dudas?</h2>' +
+        '<p>Resolvemos las preguntas m&aacute;s habituales de nuestros clientes.</p></div>' +
+        '<div style="max-width:640px;margin:0 auto;">' +
+        '<div class="accordion-item" data-reveal><div class="accordion-header"><span>¿Necesito cita previa?</span><div class="accordion-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div></div><div class="accordion-body"><div class="accordion-content">Sí, es obligatorio. Trabajamos exclusivamente con cita previa para garantizarte la mejor atención. Reserva online en un clic desde nuestra web.</div></div></div>' +
+        '<div class="accordion-item" data-reveal data-reveal-delay="80"><div class="accordion-header"><span>¿Qué métodos de pago aceptan?</span><div class="accordion-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div></div><div class="accordion-body"><div class="accordion-content">Aceptamos <strong>exclusivamente tarjeta</strong> (Visa, Mastercard) y Bizum. No se acepta efectivo.</div></div></div>' +
+        '<div class="accordion-item" data-reveal data-reveal-delay="160"><div class="accordion-header"><span>¿Cómo puedo cancelar una cita?</span><div class="accordion-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div></div><div class="accordion-body"><div class="accordion-content">Puedes cancelar desde la sección "Mis citas" en tu perfil. Te pedimos al menos 2 horas de antelación para que otros clientes puedan reservar.</div></div></div>' +
+        '<div class="accordion-item" data-reveal data-reveal-delay="240"><div class="accordion-header"><span>¿Dónde estáis ubicados?</span><div class="accordion-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div></div><div class="accordion-body"><div class="accordion-content">Estamos en Calle Párroco Don Juan Cotán, 35, Gines, Sevilla 41960. Fácil acceso en transporte público y con zona de aparcamiento cercana.</div></div></div>' +
+        '<div class="accordion-item" data-reveal data-reveal-delay="320"><div class="accordion-header"><span>¿Trabajáis con productos premium?</span><div class="accordion-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div></div><div class="accordion-body"><div class="accordion-content">Sí, utilizamos exclusivamente productos de marcas reconocidas internacionalmente para garantizar los mejores resultados.</div></div></div>' +
         '</div></div></section>'
     );
+
+    // Init premium effects after render
+    setTimeout(function () {
+        initParticles();
+        initScrollReveal();
+        initCounters();
+        initTiltCards();
+        initAccordion();
+    }, 50);
 }
 
 function serviceCard(s) {
@@ -346,6 +399,7 @@ function init() {
     if (menuBtn) menuBtn.addEventListener('click', function () {
         var nav = document.getElementById('nav');
         if (nav) nav.classList.toggle('open');
+        menuBtn.classList.toggle('active');
     });
     renderHeaderActions();
     window.addEventListener('hashchange', function () { navigate(location.hash); });
